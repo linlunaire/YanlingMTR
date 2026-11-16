@@ -50,11 +50,8 @@ public abstract class RenderRouteBase<T extends BlockPSDTop.TileEntityRouteBase>
 		final BlockState state = world.getBlockState(pos);
 		final Direction facing = IBlock.getStatePropertySafe(state, HorizontalDirectionalBlock.FACING);
 
-		final StoredMatrixTransformations storedMatrixTransformations = new StoredMatrixTransformations();
-		storedMatrixTransformations.add(matricesNew -> {
-			matricesNew.translate(0.5 + entity.getBlockPos().getX(), entity.getBlockPos().getY(), 0.5 + entity.getBlockPos().getZ());
-			UtilitiesClient.rotateYDegrees(matricesNew, -facing.toYRot());
-		});
+		final StoredMatrixTransformations storedMatrixTransformations = StoredMatrixTransformations.atBlockEntity(matrices, vertexConsumers, pos, 0.5, 0, 0.5);
+		storedMatrixTransformations.add(matricesNew -> UtilitiesClient.rotateYDegrees(matricesNew, -facing.toYRot()));
 
 		renderAdditionalUnmodified(storedMatrixTransformations.copy(), state, facing, light);
 
@@ -85,10 +82,8 @@ public abstract class RenderRouteBase<T extends BlockPSDTop.TileEntityRouteBase>
 						resourceLocation = ClientData.DATA_CACHE.getRouteMap(platformId, false, arrowDirection == 2, width / height, transparentWhite).resourceLocation;
 					}
 
-					RenderTrains.scheduleRender(resourceLocation, false, RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
-						storedMatrixTransformations.transform(matricesNew);
+					storedMatrixTransformations.draw(resourceLocation, RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
 						IDrawing.drawTexture(matricesNew, vertexConsumer, leftBlocks == 0 ? sidePadding : 0, topPadding, 0, 1 - (rightBlocks == 0 ? sidePadding : 0), 1 - bottomPadding, 0, (leftBlocks - (leftBlocks == 0 ? 0 : sidePadding)) / width, 0, (width - rightBlocks + (rightBlocks == 0 ? 0 : sidePadding)) / width, 1, facing.getOpposite(), color, light);
-						matricesNew.popPose();
 					});
 				}
 

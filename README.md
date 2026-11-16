@@ -6,7 +6,7 @@
   <p>Automated trains, stations and passenger information for Minecraft 1.21.1.</p>
 
   <p>
-    <a href="#whats-new"><img src="https://img.shields.io/badge/YanlingMTR-1.0.5-B52650?style=flat-square" alt="YanlingMTR 1.0.5"></a>
+    <a href="#whats-new"><img src="https://img.shields.io/badge/YanlingMTR-1.0.6-B52650?style=flat-square" alt="YanlingMTR 1.0.6"></a>
     <img src="https://img.shields.io/badge/Minecraft-1.21.1-62A854?style=flat-square" alt="Minecraft 1.21.1">
     <img src="https://img.shields.io/badge/Loaders-Fabric%20%2B%20NeoForge-546E7A?style=flat-square" alt="Fabric and NeoForge">
     <img src="https://img.shields.io/badge/Java-21-E58A2B?style=flat-square" alt="Java 21">
@@ -38,14 +38,14 @@ YanlingMTR is a community continuation of [Minecraft Transit Railway](https://gi
 
 ## Download & install
 
-Download **`YanlingMTR-1.21.1`** from the Artifacts section of a successful [1.21.1 build](https://github.com/linlunaire/YanlingMTR/actions/workflows/build.yml?query=branch%3A1.21.1). GitHub requires sign-in to download workflow artifacts.
+Download the JAR for your loader from the [latest release](https://github.com/linlunaire/YanlingMTR/releases/latest).
 
 Use **Java 21** and place the JAR for your loader in `mods/`, together with its Minecraft 1.21.1 dependencies:
 
 | Loader | Required dependencies | Mod file |
 | :--- | :--- | :--- |
-| Fabric | [Fabric API](https://modrinth.com/mod/fabric-api) · [Architectury API 13.0.11+](https://modrinth.com/mod/architectury-api) | `YanlingMTR-fabric-1.21.1-1.0.5.jar` |
-| NeoForge 21.1.248+ | [Architectury API 13.0.11+](https://modrinth.com/mod/architectury-api) | `YanlingMTR-neoforge-1.21.1-1.0.5.jar` |
+| Fabric | [Fabric API](https://modrinth.com/mod/fabric-api) · [Architectury API 13.0.11+](https://modrinth.com/mod/architectury-api) | `YanlingMTR-fabric-1.21.1-1.0.6.jar` |
+| NeoForge 21.1.248+ | [Architectury API 13.0.11+](https://modrinth.com/mod/architectury-api) | `YanlingMTR-neoforge-1.21.1-1.0.6.jar` |
 
 Replace your existing MTR JAR and use matching versions on clients and servers. For custom models and scripting, install [YLTE 1.1.3](https://github.com/linlunaire/mtr-ante/tree/1.21.1) separately.
 
@@ -53,6 +53,11 @@ Replace your existing MTR JAR and use matching versions on clients and servers. 
 > Back up worlds, configuration and resource packs before upgrading. The `mtr` ID, save namespaces, configuration paths and network channels are retained. The separate [26.2 development branch](https://github.com/linlunaire/YanlingMTR/tree/master) uses different builds.
 
 ## What's new
+
+**1.0.6**
+
+- Fixed platform screen door arrows, route maps, line strips and angled end panels disappearing with Iris shaders enabled.
+- Fixed missing route information and station names on half-height platform gates with Iris shaders enabled.
 
 **1.0.5**
 

@@ -31,13 +31,17 @@ public class StoredMatrixTransformations {
 	}
 
 	public static StoredMatrixTransformations atBlockEntity(PoseStack matrices, BlockPos pos, double x, double y, double z) {
+		return atBlockEntity(matrices, null, pos, x, y, z);
+	}
+
+	static StoredMatrixTransformations atBlockEntity(PoseStack matrices, MultiBufferSource buffers, BlockPos pos, double x, double y, double z) {
 		final long frame = MTRClient.getRenderFrame();
 		if (irisCheckFrame != frame) {
 			shaderPackInUse = IrisShaderStatus.ACTIVE.getAsBoolean();
 			irisCheckFrame = frame;
 		}
 		// The vanilla buffer flushes on texture changes. Keep its world-space batching.
-		return new StoredMatrixTransformations(new BlockAnchor(shaderPackInUse ? matrices : null, pos, x, y, z));
+		return new StoredMatrixTransformations(new BlockAnchor(shaderPackInUse ? matrices : null, shaderPackInUse ? buffers : null, pos, x, y, z));
 	}
 
 	public void add(Consumer<PoseStack> transformation) {
@@ -64,9 +68,13 @@ public class StoredMatrixTransformations {
 		draw(buffers, texture, layer, false, renderer);
 	}
 
+	void draw(ResourceLocation texture, RenderTrains.QueuedRenderLayer layer, BiConsumer<PoseStack, VertexConsumer> renderer) {
+		draw(anchor == null ? null : anchor.buffers, texture, layer, false, renderer);
+	}
+
 	public void draw(MultiBufferSource buffers, ResourceLocation texture, RenderTrains.QueuedRenderLayer layer, boolean priority, BiConsumer<PoseStack, VertexConsumer> renderer) {
 		final PoseStack matrices = anchor == null ? null : anchor.localPose;
-		if (matrices == null) {
+		if (matrices == null || buffers == null) {
 			RenderTrains.scheduleRender(texture, priority, layer, (worldPose, vertices) -> {
 				transform(worldPose);
 				try {
@@ -102,7 +110,7 @@ public class StoredMatrixTransformations {
 		}
 	}
 
-	private record BlockAnchor(PoseStack localPose, BlockPos pos, double x, double y, double z) {}
+	private record BlockAnchor(PoseStack localPose, MultiBufferSource buffers, BlockPos pos, double x, double y, double z) {}
 
 	private static final class IrisShaderStatus {
 		private static final BooleanSupplier ACTIVE = find();
