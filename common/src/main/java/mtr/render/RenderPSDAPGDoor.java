@@ -73,9 +73,14 @@ public class RenderPSDAPGDoor<T extends BlockPSDAPGDoorBase.TileEntityPSDAPGDoor
 		final int sideIndex = side ? 1 : 0;
 		final int openIndex = open > 0 ? 1 : 0;
 
-		final StoredMatrixTransformations storedMatrixTransformations = new StoredMatrixTransformations();
+		final StoredMatrixTransformations storedMatrixTransformations;
+		if (type < 3) {
+			storedMatrixTransformations = StoredMatrixTransformations.atBlockEntity(matrices, pos, 0.5, 0, 0.5);
+		} else {
+			storedMatrixTransformations = new StoredMatrixTransformations();
+			storedMatrixTransformations.add(matricesNew -> matricesNew.translate(0.5 + pos.getX(), pos.getY(), 0.5 + pos.getZ()));
+		}
 		storedMatrixTransformations.add(matricesNew -> {
-			matricesNew.translate(0.5 + entity.getBlockPos().getX(), entity.getBlockPos().getY(), 0.5 + entity.getBlockPos().getZ());
 			UtilitiesClient.rotateYDegrees(matricesNew, -facing.toYRot());
 			UtilitiesClient.rotateXDegrees(matricesNew, 180);
 		});
@@ -85,18 +90,14 @@ public class RenderPSDAPGDoor<T extends BlockPSDAPGDoorBase.TileEntityPSDAPGDoor
 			case 0:
 			case 1:
 				if (half) {
-					RenderTrains.scheduleRender(LIGHT_TEXTURES[openIndex], false, open > 0 ? RenderTrains.QueuedRenderLayer.LIGHT : RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
-						storedMatrixTransformationsLight.transform(matricesNew);
+					storedMatrixTransformationsLight.draw(vertexConsumers, LIGHT_TEXTURES[openIndex], open > 0 ? RenderTrains.QueuedRenderLayer.LIGHT : RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
 						(side ? MODEL_PSD_LIGHT_RIGHT : MODEL_PSD_LIGHT_LEFT).renderToBuffer(matricesNew, vertexConsumer, light, overlay, 0xFFFFFFFF);
-						matricesNew.popPose();
 					});
 				}
 				if (end) {
-					RenderTrains.scheduleRender(PSD_DOOR_END_2_TEXTURES[halfIndex][sideIndex][type], false, RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
-						storedMatrixTransformationsLight.transform(matricesNew);
+					storedMatrixTransformationsLight.draw(vertexConsumers, PSD_DOOR_END_2_TEXTURES[halfIndex][sideIndex][type], RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
 						matricesNew.translate(open / 2 * (side ? -1 : 1), 0, 0);
 						(side ? MODEL_PSD_END_RIGHT_2 : MODEL_PSD_END_LEFT_2).renderToBuffer(matricesNew, vertexConsumer, light, overlay, 0xFFFFFFFF);
-						matricesNew.popPose();
 					});
 				}
 				break;
@@ -104,12 +105,10 @@ public class RenderPSDAPGDoor<T extends BlockPSDAPGDoorBase.TileEntityPSDAPGDoor
 				if (half) {
 					final Block block = world.getBlockState(pos.relative(side ? facing.getClockWise() : facing.getCounterClockWise())).getBlock();
 					if (block instanceof BlockAPGGlass || block instanceof BlockAPGGlassEnd) {
-						RenderTrains.scheduleRender(APG_LIGHT_TEXTURES[openIndex], false, open > 0 ? RenderTrains.QueuedRenderLayer.LIGHT_TRANSLUCENT : RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
-							storedMatrixTransformationsLight.transform(matricesNew);
+						storedMatrixTransformationsLight.draw(vertexConsumers, APG_LIGHT_TEXTURES[openIndex], open > 0 ? RenderTrains.QueuedRenderLayer.LIGHT_TRANSLUCENT : RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
 							matricesNew.translate(side ? -0.515625 : 0.515625, 0, 0);
 							matricesNew.scale(0.5F, 1, 1);
 							MODEL_APG_LIGHT.renderToBuffer(matricesNew, vertexConsumer, light, overlay, 0xFFFFFFFF);
-							matricesNew.popPose();
 						});
 					}
 				}
@@ -122,40 +121,30 @@ public class RenderPSDAPGDoor<T extends BlockPSDAPGDoorBase.TileEntityPSDAPGDoor
 			case 0:
 			case 1:
 				if (end) {
-					RenderTrains.scheduleRender(PSD_DOOR_END_1_TEXTURES[halfIndex][sideIndex][type], false, RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
-						storedMatrixTransformations.transform(matricesNew);
+					storedMatrixTransformations.draw(vertexConsumers, PSD_DOOR_END_1_TEXTURES[halfIndex][sideIndex][type], RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
 						(side ? MODEL_PSD_END_RIGHT_1 : MODEL_PSD_END_LEFT_1).renderToBuffer(matricesNew, vertexConsumer, light, overlay, 0xFFFFFFFF);
-						matricesNew.popPose();
 					});
 				} else {
-					RenderTrains.scheduleRender(PSD_DOOR_TEXTURES[halfIndex][sideIndex][type], false, RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
-						storedMatrixTransformations.transform(matricesNew);
+					storedMatrixTransformations.draw(vertexConsumers, PSD_DOOR_TEXTURES[halfIndex][sideIndex][type], RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
 						MODEL_PSD.renderToBuffer(matricesNew, vertexConsumer, light, overlay, 0xFFFFFFFF);
-						matricesNew.popPose();
 					});
 				}
 				if (half && !unlocked) {
-					RenderTrains.scheduleRender(DOOR_NOT_IN_USE_TEXTURE, false, RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
-						storedMatrixTransformations.transform(matricesNew);
+					storedMatrixTransformations.draw(vertexConsumers, DOOR_NOT_IN_USE_TEXTURE, RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
 						if (end) {
 							matricesNew.translate(side ? 0.25 : -0.25, 0, 0);
 						}
 						MODEL_PSD_DOOR_LOCKED.renderToBuffer(matricesNew, vertexConsumer, light, overlay, 0xFFFFFFFF);
-						matricesNew.popPose();
 					});
 				}
 				break;
 			case 2:
-				RenderTrains.scheduleRender(APG_DOOR_TEXTURES[halfIndex][sideIndex], false, RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
-					storedMatrixTransformations.transform(matricesNew);
+				storedMatrixTransformations.draw(vertexConsumers, APG_DOOR_TEXTURES[halfIndex][sideIndex], RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
 					(half ? MODEL_APG_TOP : MODEL_APG_BOTTOM).renderToBuffer(matricesNew, vertexConsumer, light, overlay, 0xFFFFFFFF);
-					matricesNew.popPose();
 				});
 				if (half && !unlocked) {
-					RenderTrains.scheduleRender(DOOR_NOT_IN_USE_TEXTURE, false, RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
-						storedMatrixTransformations.transform(matricesNew);
+					storedMatrixTransformations.draw(vertexConsumers, DOOR_NOT_IN_USE_TEXTURE, RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
 						MODEL_APG_DOOR_LOCKED.renderToBuffer(matricesNew, vertexConsumer, light, overlay, 0xFFFFFFFF);
-						matricesNew.popPose();
 					});
 				}
 				break;
@@ -165,17 +154,13 @@ public class RenderPSDAPGDoor<T extends BlockPSDAPGDoorBase.TileEntityPSDAPGDoor
 				}
 				storedMatrixTransformations.add(matricesNew -> matricesNew.translate(side ? 0.5 : -0.5, 0, 0));
 			case 3:
-				RenderTrains.scheduleRender(LIFT_DOOR_TEXTURES[halfIndex][sideIndex], false, RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
-					storedMatrixTransformations.transform(matricesNew);
+				storedMatrixTransformations.draw(vertexConsumers, LIFT_DOOR_TEXTURES[halfIndex][sideIndex], RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
 					(side ? MODEL_LIFT_RIGHT : MODEL_LIFT_LEFT).renderToBuffer(matricesNew, vertexConsumer, light, overlay, 0xFFFFFFFF);
-					matricesNew.popPose();
 				});
 				if (half && !unlocked) {
-					RenderTrains.scheduleRender(DOOR_NOT_IN_USE_TEXTURE, false, RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
-						storedMatrixTransformations.transform(matricesNew);
+					storedMatrixTransformations.draw(vertexConsumers, DOOR_NOT_IN_USE_TEXTURE, RenderTrains.QueuedRenderLayer.EXTERIOR, (matricesNew, vertexConsumer) -> {
 						matricesNew.translate(side ? 0.125 : -0.125, 0, 0);
 						MODEL_PSD_DOOR_LOCKED.renderToBuffer(matricesNew, vertexConsumer, light, overlay, 0xFFFFFFFF);
-						matricesNew.popPose();
 					});
 				}
 				break;

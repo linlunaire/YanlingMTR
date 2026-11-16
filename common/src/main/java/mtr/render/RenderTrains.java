@@ -355,22 +355,7 @@ public class RenderTrains extends EntityRendererMapper<EntitySeat> implements IG
 			for (int j = 0; j < QUEUED_RENDER_LAYERS.length; j++) {
 				final QueuedRenderLayer queuedRenderLayer = QUEUED_RENDER_LAYERS[j];
 				for (final Map.Entry<ResourceLocation, Set<BiConsumer<PoseStack, VertexConsumer>>> entry : currentRenderStage.get(j).entrySet()) {
-					final RenderType renderType;
-					switch (queuedRenderLayer) {
-						case LIGHT:
-							renderType = MoreRenderLayers.getLight(entry.getKey(), false);
-							break;
-						case LIGHT_TRANSLUCENT:
-							renderType = MoreRenderLayers.getLight(entry.getKey(), true);
-							break;
-						case INTERIOR:
-							renderType = MoreRenderLayers.getInterior(entry.getKey());
-							break;
-						default:
-							renderType = MoreRenderLayers.getExterior(entry.getKey());
-							break;
-					}
-					final VertexConsumer vertexConsumer = vertexConsumers.getBuffer(renderType);
+					final VertexConsumer vertexConsumer = vertexConsumers.getBuffer(queuedRenderLayer.renderType(entry.getKey()));
 					for (final BiConsumer<PoseStack, VertexConsumer> renderer : entry.getValue()) {
 						renderer.accept(matrices, vertexConsumer);
 					}
@@ -572,5 +557,16 @@ public class RenderTrains extends EntityRendererMapper<EntitySeat> implements IG
 		}
 	}
 
-	public enum QueuedRenderLayer {LIGHT, LIGHT_TRANSLUCENT, INTERIOR, EXTERIOR}
+	public enum QueuedRenderLayer {
+		LIGHT, LIGHT_TRANSLUCENT, INTERIOR, EXTERIOR;
+
+		RenderType renderType(ResourceLocation texture) {
+			return switch (this) {
+				case LIGHT -> MoreRenderLayers.getLight(texture, false);
+				case LIGHT_TRANSLUCENT -> MoreRenderLayers.getLight(texture, true);
+				case INTERIOR -> MoreRenderLayers.getInterior(texture);
+				case EXTERIOR -> MoreRenderLayers.getExterior(texture);
+			};
+		}
+	}
 }

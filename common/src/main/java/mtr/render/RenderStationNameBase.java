@@ -36,9 +36,8 @@ public abstract class RenderStationNameBase<T extends BlockStationNameBase.TileE
 		final Direction facing = IBlock.getStatePropertySafe(state, BlockStationNameBase.FACING);
 		final int color = RenderRouteBase.getShadingColor(facing, entity.getColor(state));
 
-		final StoredMatrixTransformations storedMatrixTransformations = new StoredMatrixTransformations();
+		final StoredMatrixTransformations storedMatrixTransformations = StoredMatrixTransformations.atBlockEntity(matrices, pos, 0.5, 0.5 + entity.yOffset, 0.5);
 		storedMatrixTransformations.add(matricesNew -> {
-			matricesNew.translate(0.5 + entity.getBlockPos().getX(), 0.5 + entity.yOffset + entity.getBlockPos().getY(), 0.5 + entity.getBlockPos().getZ());
 			UtilitiesClient.rotateYDegrees(matricesNew, -facing.toYRot());
 			UtilitiesClient.rotateZDegrees(matricesNew, 180);
 		});
